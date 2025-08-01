@@ -7,6 +7,14 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+type Level int8
+
+const (
+	DebugLevel Level = Level(zapcore.DebugLevel)
+	InfoLevel  Level = Level(zapcore.InfoLevel)
+	WarnLevel  Level = Level(zapcore.WarnLevel)
+)
+
 type Logger interface {
 	Debug(args ...interface{})
 	Info(args ...interface{})
@@ -24,9 +32,9 @@ type Logger interface {
 	Named(string) Logger
 }
 
-func NewLogger() Logger {
+func NewLogger(level Level) Logger {
 	cfg := zap.Config{
-		Level:            zap.NewAtomicLevelAt(zap.InfoLevel),
+		Level:            zap.NewAtomicLevelAt(zapcore.Level(level)),
 		DisableCaller:    false,
 		OutputPaths:      []string{"stderr"},
 		ErrorOutputPaths: []string{"stderr"},
@@ -39,7 +47,7 @@ func NewLogger() Logger {
 			EncodeLevel:    zapcore.LowercaseLevelEncoder,
 			EncodeTime:     zapcore.RFC3339NanoTimeEncoder,
 			EncodeDuration: zapcore.SecondsDurationEncoder,
-			CallerKey:      "file",
+			CallerKey:      "prepare",
 			EncodeCaller:   zapcore.ShortCallerEncoder,
 			EncodeName:     zapcore.FullNameEncoder,
 		},
