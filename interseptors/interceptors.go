@@ -2,6 +2,7 @@ package interceptor
 
 import (
 	"context"
+	"fmt"
 	"github.com/kkiling/goplatform/log"
 	"github.com/kkiling/goplatform/server"
 
@@ -16,7 +17,7 @@ func NewPanicRecoverInterceptor(logger log.Logger) grpc.UnaryServerInterceptor {
 		defer func() {
 			if r := recover(); r != nil {
 				logger.Errorf("panic recovered: %v", r)
-				err = server.ErrInternal(err)
+				err = server.ErrInternal(fmt.Errorf("panic recovered: %v", r))
 			}
 		}()
 
