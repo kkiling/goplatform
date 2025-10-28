@@ -7,4 +7,6 @@ var (
 	ErrNotFound = errors.New("entity not found")
 	// ErrAlreadyExists запись уже существует
 	ErrAlreadyExists = errors.New("entity already exists")
+	// ErrForeignKeyViolation foreign key violation
+	ErrForeignKeyViolation = errors.New("foreign key violation")
 )
