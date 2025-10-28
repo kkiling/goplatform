@@ -1,14 +1,17 @@
 package testutils
 
 import (
-	"github.com/kkiling/goplatform/log"
-	"github.com/kkiling/goplatform/storagebase/sqlitebase"
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
+
+	"github.com/kkiling/goplatform/log"
+	"github.com/kkiling/goplatform/storagebase/postgrebase"
+	"github.com/kkiling/goplatform/storagebase/sqlitebase"
 )
 
 // findUp ищет файл с именем `filename` в текущей и родительских директориях.
@@ -36,7 +39,8 @@ func findUp(filename string) string {
 }
 
 var envPath = ""
-var storage *sqlitebase.Storage = nil
+var storageSqlite *sqlitebase.Storage = nil
+var storagePostgres *postgrebase.Storage = nil
 
 func init() {
 	envPath = findUp(".testenv")
@@ -58,9 +62,17 @@ func getSqliteTestDNS(t *testing.T) string {
 	return os.Getenv("SQLITE_DSN")
 }
 
+func getPostgresqlTestConnString(t *testing.T) string {
+	// Загружаем переменные окружения из .testenv файла
+	err := godotenv.Overload(envPath)
+	require.NoError(t, err, "Failed to load .testenv file")
+
+	return os.Getenv("POSTGRES_CONN_STRING")
+}
+
 func SetupSqlTestDB(t *testing.T) *sqlitebase.Storage {
-	if storage != nil {
-		return storage
+	if storageSqlite != nil {
+		return storageSqlite
 	}
 	// Инициализируем хранилище
 	cfg := sqlitebase.Config{
@@ -72,6 +84,24 @@ func SetupSqlTestDB(t *testing.T) *sqlitebase.Storage {
 	require.NoError(t, err)
 
 	// Возвращаем хранилище и функцию очистки
-	storage = s
+	storageSqlite = s
 	return s
+}
+
+func SetupPostgresqlTestDB(t *testing.T) *postgrebase.Storage {
+	if storagePostgres != nil {
+		return storagePostgres
+	}
+	// Инициализируем хранилище
+	cfg := postgrebase.Config{
+		ConnString: getPostgresqlTestConnString(t), // Берем DSN из переменных окружения
+	}
+
+	s, err := postgrebase.NewPgConn(context.Background(), cfg)
+	require.NoError(t, err)
+
+	// Возвращаем хранилище и функцию очистки
+	storagePostgres = postgrebase.NewStorage(s)
+
+	return storagePostgres
 }

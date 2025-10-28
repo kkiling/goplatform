@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/kkiling/goplatform/storagebase"
 	"strings"
 
-	"github.com/kkiling/goplatform/log"
 	"github.com/mattn/go-sqlite3"
+
+	"github.com/kkiling/goplatform/log"
+	"github.com/kkiling/goplatform/storagebase"
 )
 
 type SQLExecutor interface {
